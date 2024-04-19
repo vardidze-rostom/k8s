@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: landing-{{ .Values.entity }}
+  labels:
+    app: landing-{{ .Values.entity }}
+    environment:  {{ .Values.typeEnvironment }}
+spec:
+  replicas: 3
+  minReadySeconds: 5
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: ewa-landing-{{ .Values.entity }}
+  template:
+    metadata:
+      labels:
+        app: ewa-landing-{{ .Values.entity }}
+        environment:  {{ .Values.typeEnvironment }}
+    spec:
+      containers:
+        - name: landing-{{ .Values.entity }}
+          image: 947095888671.dkr.ecr.eu-central-1.amazonaws.com/zaytoon-landing:{{ .Values.image.tag_landing }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 80
+      imagePullSecrets:
+        - name: regcred   
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: landing-service-{{ .Values.entity }}
+  labels:
+    environment:  {{ .Values.typeEnvironment }}
+spec:
+  selector:
+    app: ewa-landing-{{ .Values.entity }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.service.port }}
+      targetPort: 80
+  type: ClusterIP

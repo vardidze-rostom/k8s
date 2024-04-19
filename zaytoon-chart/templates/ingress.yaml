@@ -1,0 +1,64 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-zaytoon-hosts-{{ .Values.entity }}
+  labels:
+    environment: {{ .Values.typeEnvironment }}
+spec:
+  rules:
+  - host: ewa-app.{{ .Values.ingress.host }}
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: ewa-app-service-{{ .Values.entity }}
+            port:
+              number: {{ .Values.service.port }}
+
+  - host: ewa-back.{{ .Values.ingress.host }}
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: ewa-back-service-{{ .Values.entity }}
+            port:
+              number: {{ .Values.service.port }}
+
+  - host: flower.{{ .Values.ingress.host }}
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: ewa-back-service-{{ .Values.entity }}
+            port:
+              number: 5555
+
+  - host: {{ .Values.ingress.host }}
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: landing-service-{{ .Values.entity }}
+            port:
+              number: {{ .Values.service.port }}
+
+  - host: strapi.{{ .Values.ingress.host }}
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: strapi-service-{{ .Values.entity }}
+            port:
+              number: {{ .Values.service.port }}
+
+  ingressClassName: nginx

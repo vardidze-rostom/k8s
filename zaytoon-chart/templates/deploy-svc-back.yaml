@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ewa-back-{{ .Values.entity }}
+  labels:
+    app: ewa-back-{{ .Values.entity }}
+    environment: {{ .Values.typeEnvironment }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  minReadySeconds: 5
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: django-back-{{ .Values.entity }}
+  template:
+    metadata:
+      labels:
+        app: django-back-{{ .Values.entity }}
+        environment:  {{ .Values.typeEnvironment }}
+    spec:
+      volumes:
+        - name: json-firebase-creds
+          secret:
+            secretName: secret-ewa-back-{{ .Values.entity }}
+            items:
+              - key: firebase_creds_json
+                path: firebase_creds.json
+      containers:
+        - name: zaytoon-back-{{ .Values.entity }}
+          image: 947095888671.dkr.ecr.eu-central-1.amazonaws.com/zaytoon-back:{{ .Values.image.tag_back }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+          - mountPath: /app/firebase_creds.json
+            name: json-firebase-creds
+            subPath: firebase_creds.json
+          command: ["/bin/sh"]
+          args: ["-c", "python manage.py wait_for_db &&
+                  python manage.py collectstatic --noinput &&
+                  python manage.py migrate &&
+                  gunicorn --bind 0.0.0.0:8000 configs.wsgi"]
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - secretRef:
+                name: secret-ewa-back-{{ .Values.entity }}
+
+        - name: zaytoon-worker-{{ .Values.entity }}
+          image: 947095888671.dkr.ecr.eu-central-1.amazonaws.com/zaytoon-back:{{ .Values.image.tag_back }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+          - mountPath: /app/firebase_creds.json
+            name: json-firebase-creds
+            subPath: firebase_creds.json
+          command: ["/bin/sh"]
+          args: ["-c", "celery -A configs.celery.app worker --concurrency=2 --loglevel=warning"]
+          envFrom:
+            - secretRef:
+                name: secret-ewa-back-{{ .Values.entity }}
+
+        - name: zaytoon-flower-{{ .Values.entity }}
+          image: 947095888671.dkr.ecr.eu-central-1.amazonaws.com/zaytoon-back:{{ .Values.image.tag_back }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+          - mountPath: /app/firebase_creds.json
+            name: json-firebase-creds
+            subPath: firebase_creds.json
+          command: ["/bin/sh"]
+          args: ["-c", "celery -A configs.celery.app flower --basic-auth=${FLOWER_USER}:${FLOWER_PASSWORD}"]
+          ports:
+            - containerPort: 5555
+          envFrom:
+            - secretRef:
+                name: secret-ewa-back-{{ .Values.entity }}
+
+
+        - name: zaytoon-redis-{{ .Values.entity }}
+          image: redis:7.0.5-alpine
+          ports:
+            - containerPort: 6379
+      imagePullSecrets:
+        - name: regcred
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ewa-back-service-{{ .Values.entity }}
+  labels:
+    environment:  {{ .Values.typeEnvironment }}
+spec:
+  selector:
+    app: django-back-{{ .Values.entity }}
+  ports:
+    - name: backend
+      protocol: TCP
+      port: {{ .Values.service.port }}
+      targetPort: 8000
+    - name: flower
+      protocol: TCP
+      port: 5555 # flower
+      targetPort: 5555 
+  type: {{ .Values.service.type }}

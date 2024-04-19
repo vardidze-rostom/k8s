@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: strapi-{{ .Values.entity }}
+  labels:
+    app: strapi-{{ .Values.entity }}
+    environment: {{ .Values.typeEnvironment }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  minReadySeconds: 5
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: ewa-strapi-{{ .Values.entity }}
+  template:
+    metadata:
+      labels:
+        app: ewa-strapi-{{ .Values.entity }}
+        environment:  {{ .Values.typeEnvironment }}
+    spec:
+      containers:
+        - name: strapi-{{ .Values.entity }}
+          image: 947095888671.dkr.ecr.eu-central-1.amazonaws.com/zaytoon-strapi:{{ .Values.image.tag_strapi }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/bin/sh"]
+          args: ["-c", "npm run start"]
+          ports:
+            - containerPort: 1337
+          envFrom:
+            - secretRef:
+                name: secret-strapi-{{ .Values.entity }}
+      imagePullSecrets:
+        - name: regcred   
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: strapi-service-{{ .Values.entity }}
+  labels:
+    environment: {{ .Values.typeEnvironment }}
+spec:
+  selector:
+    app: ewa-strapi-{{ .Values.entity }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.service.port }}
+      targetPort: 1337
+  type: {{ .Values.service.type }}

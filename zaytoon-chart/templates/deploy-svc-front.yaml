@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ewa-app-{{ .Values.entity }}
+  labels:
+    app: ewa-app-{{ .Values.entity }}
+    environment:  {{ .Values.typeEnvironment }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  minReadySeconds: 5
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: ewa-front-{{ .Values.entity }}
+  template:
+    metadata:
+      labels:
+        app: ewa-front-{{ .Values.entity }}
+        environment:  {{ .Values.typeEnvironment }}
+    spec:
+      containers:
+        - name: ewa-app-{{ .Values.entity }}
+          image: 947095888671.dkr.ecr.eu-central-1.amazonaws.com/zaytoon-front:{{ .Values.image.tag_front }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 3000
+      imagePullSecrets:
+        - name: regcred
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ewa-app-service-{{ .Values.entity }}
+  labels:
+    app: ewa-app-{{ .Values.entity }}
+    environment:  {{ .Values.typeEnvironment }}
+spec:
+  selector:
+    app: ewa-front-{{ .Values.entity }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.service.port }}
+      targetPort: 3000
+  type: {{ .Values.service.type }}

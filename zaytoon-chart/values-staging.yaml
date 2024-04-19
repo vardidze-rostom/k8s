@@ -1,0 +1,47 @@
+# Default values for zaytoon-chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 3
+
+image:
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag_back: "staging-latest"
+  tag_front: "staging-latest"
+  tag_landing: "staging-latest"
+  tag_strapi: "staging-latest"
+
+service:
+  type: ClusterIP
+  port: 80
+
+entity: staging
+
+ingress:
+  host: staging.zaytoon.io 
+
+envVariablesBack:
+  ALLOWED_HOSTS: "*"
+  POSTGRES_DB: postgres
+  POSTGRES_HOST: zaytoon-k8s-staging.cbykyy4uil8d.eu-central-1.rds.amazonaws.com
+  POSTGRES_PORT: "5432"
+  POSTGRES_USER: postgres
+  POSTGRES_NAME: zaytoon_back
+  REDIS_HOST: "127.0.0.1"
+  AWS_S3_REGION_NAME: ru-1
+  AWS_S3_CUSTOM_DOMAIN: https://s3.timeweb.com
+  FLOWER_USER: flower
+  ENVIRONMENT: STAGING
+
+
+envVariablesStrapi:
+  POSTGRES_NAME: zaytoon_strapi
+  HOST: "0.0.0.0"
+  PORT: "1337"
+  DATABASE_CLIENT: postgres
+  POSTGRES_HOST: zaytoon-k8s-staging.cbykyy4uil8d.eu-central-1.rds.amazonaws.com
+  POSTGRES_PORT: "5432"
+  POSTGRES_USER: postgres
+
+typeEnvironment: staging
