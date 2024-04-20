@@ -30,8 +30,8 @@ spec:
               - key: firebase_creds_json
                 path: firebase_creds.json
       containers:
-        - name: zaytoon-back-{{ .Values.entity }}
-          image: 947095888671.dkr.ecr.eu-central-1.amazonaws.com/zaytoon-back:{{ .Values.image.tag_back }}
+        - name: vardidze-back-{{ .Values.entity }}
+          image: 947095888671.dkr.ecr.eu-central-1.amazonaws.com/vardidze-back:{{ .Values.image.tag_back }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           volumeMounts:
           - mountPath: /app/firebase_creds.json
@@ -48,8 +48,8 @@ spec:
             - secretRef:
                 name: secret-ewa-back-{{ .Values.entity }}
 
-        - name: zaytoon-worker-{{ .Values.entity }}
-          image: 947095888671.dkr.ecr.eu-central-1.amazonaws.com/zaytoon-back:{{ .Values.image.tag_back }}
+        - name: vardidze-worker-{{ .Values.entity }}
+          image: 947095888671.dkr.ecr.eu-central-1.amazonaws.com/vardidze-back:{{ .Values.image.tag_back }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           volumeMounts:
           - mountPath: /app/firebase_creds.json
@@ -61,8 +61,8 @@ spec:
             - secretRef:
                 name: secret-ewa-back-{{ .Values.entity }}
 
-        - name: zaytoon-flower-{{ .Values.entity }}
-          image: 947095888671.dkr.ecr.eu-central-1.amazonaws.com/zaytoon-back:{{ .Values.image.tag_back }}
+        - name: vardidze-flower-{{ .Values.entity }}
+          image: 947095888671.dkr.ecr.eu-central-1.amazonaws.com/vardidze-back:{{ .Values.image.tag_back }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           volumeMounts:
           - mountPath: /app/firebase_creds.json
@@ -77,7 +77,7 @@ spec:
                 name: secret-ewa-back-{{ .Values.entity }}
 
 
-        - name: zaytoon-redis-{{ .Values.entity }}
+        - name: vardidze-redis-{{ .Values.entity }}
           image: redis:7.0.5-alpine
           ports:
             - containerPort: 6379

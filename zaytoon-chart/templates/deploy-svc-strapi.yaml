@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: strapi-{{ .Values.entity }}
-          image: 947095888671.dkr.ecr.eu-central-1.amazonaws.com/zaytoon-strapi:{{ .Values.image.tag_strapi }}
+          image: 947095888671.dkr.ecr.eu-central-1.amazonaws.com/vardidze-strapi:{{ .Values.image.tag_strapi }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["/bin/sh"]
           args: ["-c", "npm run start"]

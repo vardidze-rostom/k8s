@@ -1,4 +1,4 @@
-# Default values for zaytoon-chart.
+# Default values for vardidze-chart.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -16,24 +16,24 @@ service:
 entity: prod
 
 ingress:
-  host: k8s.zaytoon.io 
+  host: k8s.vardidze.io 
 
 envVariablesBack:
   ALLOWED_HOSTS: "*"
   POSTGRES_DB: postgres
-  POSTGRES_HOST: zaytoon-k8s-staging.cbykyy4uil8d.eu-central-1.rds.amazonaws.com
+  POSTGRES_HOST: vardidze-k8s-staging.cbykyy4uil8d.eu-central-1.rds.amazonaws.com
   POSTGRES_PORT: "5432"
   POSTGRES_USER: postgres
-  POSTGRES_NAME: zaytoon_back
+  POSTGRES_NAME: vardidze_back
   AWS_S3_REGION_NAME: ru-1
   AWS_S3_CUSTOM_DOMAIN: https://s3.timeweb.com
 
 envVariablesStrapi:
-  POSTGRES_NAME: zaytoon_strapi
+  POSTGRES_NAME: vardidze_strapi
   HOST: "0.0.0.0"
   PORT: "1337"
   DATABASE_CLIENT: postgres
-  POSTGRES_HOST: zaytoon-k8s-staging.cbykyy4uil8d.eu-central-1.rds.amazonaws.com
+  POSTGRES_HOST: vardidze-k8s-staging.cbykyy4uil8d.eu-central-1.rds.amazonaws.com
   POSTGRES_PORT: "5432"
   POSTGRES_USER: postgres
 

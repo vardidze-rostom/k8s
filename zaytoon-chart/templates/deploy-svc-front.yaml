@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: ewa-app-{{ .Values.entity }}
-          image: 947095888671.dkr.ecr.eu-central-1.amazonaws.com/zaytoon-front:{{ .Values.image.tag_front }}
+          image: 947095888671.dkr.ecr.eu-central-1.amazonaws.com/vardidze-front:{{ .Values.image.tag_front }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: 3000

@@ -6,7 +6,7 @@ on:
       - staging
 
 env:
-  EKS_CLUSTER_NAME: zaytoon-staging 
+  EKS_CLUSTER_NAME: vardidze-staging 
   AWS_REGION: eu-central-1
 
 jobs:
@@ -31,4 +31,4 @@ jobs:
       #   with:
       #     exec: |
       #       echo "${{ secrets.CREDENTIALS_STAGING_K8S }}" > credentials.yaml
-      #       helm upgrade zaytoon-staging -f zaytoon-chart/values-staging.yaml -f credentials.yaml zaytoon-chart/
+      #       helm upgrade vardidze-staging -f vardidze-chart/values-staging.yaml -f credentials.yaml vardidze-chart/

@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  EKS_CLUSTER_NAME: zaytoon-prod 
+  EKS_CLUSTER_NAME: vardidze-prod 
   AWS_REGION: eu-central-1
 
 
@@ -32,4 +32,4 @@ jobs:
       #   with:
       #     exec: |
       #       echo "${{ secrets.CREDENTIALS_PROD_K8S }}" > credentials.yaml
-      #       helm upgrade zaytoon-prod -f zaytoon-chart/values-prod.yaml -f credentials.yaml zaytoon-chart/
+      #       helm upgrade vardidze-prod -f vardidze-chart/values-prod.yaml -f credentials.yaml vardidze-chart/

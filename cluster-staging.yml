@@ -2,11 +2,11 @@ apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
 
 metadata:
-  name: zaytoon-staging
+  name: vardidze-staging
   region: eu-central-1 
 
 nodeGroups:
-  - name: zaytoon
+  - name: vardidze
     instanceType: t2.large
     desiredCapacity: 1
     volumeSize: 40
