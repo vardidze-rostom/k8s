@@ -1,0 +1,81 @@
+name: Docker deploy
+
+on:
+  push:
+    branches:
+      - staging
+
+env:
+  EKS_CLUSTER_NAME: zaytoon-staging 
+  AWS_REGION: eu-central-1
+
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check Out Repo
+        uses: actions/checkout@master
+
+      - name: Make envfile
+        uses: SpicyPizza/create-envfile@v1.3
+        with:
+          envkey_VITE_API_URL: ${{ secrets.STAGING_API_URL }}
+          envkey_VITE_GA_TRACKING_ID: ${{ secrets.GA_TRACKING_ID }}
+          envkey_VITE_YANDEX_METRICA_ID: ${{ secrets.YANDEX_METRICA_ID }}
+          envkey_VITE_INTERCOM_APP_ID: ${{ secrets.INTERCOM_APP_ID }}
+          
+          file_name: .env
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{env.AWS_REGION}}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Get branch name
+        id: branch-name
+        run: |
+          REF=$(echo "${{ github.ref }}" | sed 's#refs/heads/##' | sed 's#[:_/]#-#g' | tr '[:upper:]' '[:lower:]')
+          echo "::set-output name=ref::$REF"
+
+      - name: Build the docker image and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: 947095888671.dkr.ecr.eu-central-1.amazonaws.com
+          ECR_REPOSITORY: zaytoon-landing
+          LATEST_TAG: latest
+          ECR_TAG: ${{ steps.branch-name.outputs.ref }}-${{ github.sha }}
+          LOC_TAG: ${{ steps.branch-name.outputs.ref }}
+        run: |
+          ECR_IMG="$ECR_REGISTRY/$ECR_REPOSITORY:$ECR_TAG"
+          LATEST_IMG="$ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.branch-name.outputs.ref }}-$LATEST_TAG"
+          docker build -t $ECR_IMG .
+          docker build -t $LATEST_IMG .
+          docker push $LATEST_IMG
+          docker push $ECR_IMG
+          echo "::set-output name=ecr_tag::$ECR_TAG"
+
+      - name: Check Out Repo
+        uses: actions/checkout@master
+        with:
+          repository: Zaytoon-io/k8s
+          token: ${{ secrets.ACCESS_TOKEN_GITHUB }}
+
+      - name: Update kube config
+        run: |
+          aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_REGION
+
+      - name: trigered helm
+        uses: WyriHaximus/github-action-helm3@v3
+        with:
+          exec: |
+            echo "${{ secrets.CREDENTIALS_STAGING_K8S }}" > credentials.yaml
+            sed -i 's/tag_landing: "staging-latest"/tag_landing: "${{ steps.build-image.outputs.ecr_tag }}"/' zaytoon-chart/values-staging.yaml
+            cat zaytoon-chart/values-staging.yaml
+            helm upgrade zaytoon-staging -f zaytoon-chart/values-staging.yaml -f credentials.yaml zaytoon-chart/
